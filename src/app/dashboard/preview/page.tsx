@@ -3,15 +3,27 @@
 import { useState, useEffect } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
 import clsx from "clsx";
-import { FaInstagram, FaTwitter, FaLink } from "react-icons/fa";
 
 interface Link {
   id: string;
   title: string;
   url: string;
-  icon?: string;
+  toggle?: boolean;
+  style?: {
+    textColor: "light" | "dark";
+    gradientFrom: string;
+    gradientTo: string;
+    shape: "pill" | "rounded" | "square";
+  };
 }
 
 export default function PreviewPage() {
@@ -30,19 +42,18 @@ export default function PreviewPage() {
     };
 
     const fetchLinks = async () => {
-      const snap = await getDocs(query(collection(db, "links"), where("uid", "==", user.uid)));
-      setLinks(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Link)));
+      const snap = await getDocs(
+        query(collection(db, "links"), where("uid", "==", user.uid))
+      );
+      const userLinks = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Link))
+        .filter(link => link.toggle !== false);
+      setLinks(userLinks);
     };
 
     fetchProfile();
     fetchLinks();
   }, [user]);
-
-  const getIcon = (url: string) => {
-    if (url.includes("instagram")) return <FaInstagram />;
-    if (url.includes("twitter")) return <FaTwitter />;
-    return <FaLink />;
-  };
 
   if (!profile) return <p className="text-white">Loading...</p>;
 
@@ -59,7 +70,6 @@ export default function PreviewPage() {
 
   return (
     <div className="min-h-screen bg-black px-4 py-10 space-y-6 text-white">
-      {/* Toggle Button */}
       <div className="flex justify-center">
         <button
           onClick={() => setPhoneView(!phoneView)}
@@ -69,7 +79,6 @@ export default function PreviewPage() {
         </button>
       </div>
 
-      {/* Main Preview Container */}
       <Container>
         {/* Profile Header */}
         <div className="flex items-center gap-4 mb-4">
@@ -84,26 +93,38 @@ export default function PreviewPage() {
           </div>
         </div>
 
-        {/* Bio */}
-        {profile.bio && <p className="text-sm text-neutral-300 mb-4">{profile.bio}</p>}
+        {profile.bio && (
+          <p className="text-sm text-neutral-300 mb-4">{profile.bio}</p>
+        )}
 
-        {/* Links */}
+        {/* Links Preview */}
         <div className="space-y-3 mb-6">
           {links.map(link => (
             <a
               key={link.id}
               href={link.url}
               target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-2 text-sm font-medium rounded-md shadow-glow hover:opacity-90 transition-all"
+              rel="noreferrer"
+              className={clsx(
+                "px-4 py-2 text-sm font-medium shadow-glow transition-all block text-center",
+                link.style?.textColor === "dark" ? "text-black" : "text-white",
+                link.style?.shape === "pill"
+                  ? "rounded-full"
+                  : link.style?.shape === "square"
+                  ? "rounded-none"
+                  : "rounded-md"
+              )}
+              style={{
+                backgroundImage: `linear-gradient(to right, ${link.style?.gradientFrom || "#a855f7"}, ${link.style?.gradientTo || "#ec4899"})`,
+                backdropFilter: "blur(10px)",
+              }}
             >
-              {getIcon(link.url)}
-              <span>{link.title}</span>
+              {link.title}
             </a>
           ))}
         </div>
 
-        {/* Tip Support */}
+        {/* Support Me Section */}
         <div className="border-t border-neutral-700 pt-4 space-y-3">
           <h3 className="text-sm font-semibold text-neutral-300">Support Me</h3>
           <div className="grid grid-cols-4 gap-2">
