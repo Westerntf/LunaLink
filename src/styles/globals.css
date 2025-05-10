@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0a0a0a;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.5);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.8);
+}
+
+.sidebar-link {
+  @apply flex items-center gap-3 px-4 py-2 rounded-md transition-all text-sm text-neutral-400;
+}
+.sidebar-link:hover {
+  @apply bg-neutral-800 text-white;
+}
+.sidebar-link-active {
+  @apply bg-accent text-white shadow-glow;
+}
+
+.glass-card {
+  @apply bg-[#111111] bg-opacity-80 border border-neutral-800 rounded-xl shadow-soft;
+}
+
+.gradient-btn {
+  @apply bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-glow hover:opacity-90 transition-all;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+/* ========== New Global Classes ========== */
+
+.toggle-btn {
+  @apply px-4 py-2 text-sm rounded-full border border-purple-700 text-purple-400 bg-neutral-900 hover:bg-purple-700/10 transition-all;
+}
+
+.toggle-btn.active {
+  @apply bg-purple-600 text-white shadow-glow border-purple-500;
+}
+
+.file-upload-btn {
+  @apply relative inline-flex items-center justify-center text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded-md shadow-glow cursor-pointer transition-all;
+}
+
+.file-upload-btn input[type="file"] {
+  @apply absolute inset-0 opacity-0 cursor-pointer;
+}
