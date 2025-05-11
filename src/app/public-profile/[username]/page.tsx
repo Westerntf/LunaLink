@@ -40,11 +40,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({
-  params,
-}: {
+type Props = {
   params: { username: string };
-}) {
+};
+
+export default async function Page({ params }: Props) {
   const usernameSnap = await getDoc(doc(db, "usernames", params.username));
   const uid = usernameSnap.exists() ? usernameSnap.data().uid : null;
 
@@ -65,7 +65,6 @@ export default async function Page({
   return (
     <div className="min-h-screen bg-black text-white px-4 py-10">
       <div className="max-w-2xl mx-auto space-y-6 text-center">
-        {/* Profile */}
         {profile?.photoURL && (
           <img
             src={profile.photoURL}
@@ -76,7 +75,6 @@ export default async function Page({
         <h1 className="text-2xl font-bold">{profile?.displayName}</h1>
         <p className="text-sm text-gray-400">{profile?.bio}</p>
 
-        {/* Links */}
         <div className="space-y-3 pt-2">
           {links.map((link: any) => (
             <a
@@ -91,7 +89,6 @@ export default async function Page({
           ))}
         </div>
 
-        {/* Media */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-8">
           {media.map((item: any) => (
             <div
