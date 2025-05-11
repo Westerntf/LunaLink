@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import type { Metadata } from "next";
 
+// Generate paths for static rendering
 export async function generateStaticParams() {
   const snapshot = await getDocs(collection(db, "usernames"));
   return snapshot.docs.map((doc) => ({
@@ -17,18 +18,13 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { username: string };
-}): Promise<Metadata> {
+// Generate dynamic metadata
+export async function generateMetadata({ params }: { params: { username: string } }): Promise<Metadata> {
   const usernameSnap = await getDoc(doc(db, "usernames", params.username));
   const uid = usernameSnap.exists() ? usernameSnap.data().uid : null;
 
   if (!uid) {
-    return {
-      title: "User Not Found",
-    };
+    return { title: "User Not Found" };
   }
 
   const profileSnap = await getDoc(doc(db, "users", uid));
@@ -40,23 +36,16 @@ export async function generateMetadata({
   };
 }
 
-type Props = {
-  params: { username: string };
-};
-
-export default async function Page({ params }: Props) {
+// This is the key fix: remove explicit Props interface, destructure directly
+export default async function Page({ params }: { params: { username: string } }) {
   const usernameSnap = await getDoc(doc(db, "usernames", params.username));
   const uid = usernameSnap.exists() ? usernameSnap.data().uid : null;
 
   if (!uid) return notFound();
 
   const profileSnap = await getDoc(doc(db, "users", uid));
-  const linksSnap = await getDocs(
-    query(collection(db, "links"), where("uid", "==", uid))
-  );
-  const mediaSnap = await getDocs(
-    query(collection(db, "media"), where("uid", "==", uid))
-  );
+  const linksSnap = await getDocs(query(collection(db, "links"), where("uid", "==", uid)));
+  const mediaSnap = await getDocs(query(collection(db, "media"), where("uid", "==", uid)));
 
   const profile = profileSnap.data();
   const links = linksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -107,9 +96,7 @@ export default async function Page({ params }: Props) {
                       {item.teaserCaption || "Unlock to view full content"}
                     </p>
                     <button
-                      onClick={() =>
-                        alert(`Unlocking... Price: $${item.unlockPrice}`)
-                      }
+                      onClick={() => alert(`Unlocking... Price: $${item.unlockPrice}`)}
                       className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm font-semibold"
                     >
                       Unlock for ${item.unlockPrice}
