@@ -1,4 +1,3 @@
-import React from "react";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
@@ -9,19 +8,11 @@ export async function generateStaticParams() {
   return snapshot.docs.map((doc) => ({ username: doc.id }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { username: string };
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { username: string } }): Promise<Metadata> {
   const usernameSnap = await getDoc(doc(db, "usernames", params.username));
   const uid = usernameSnap.exists() ? usernameSnap.data().uid : null;
 
-  if (!uid) {
-    return {
-      title: "User Not Found",
-    };
-  }
+  if (!uid) return { title: "User Not Found" };
 
   const profileSnap = await getDoc(doc(db, "users", uid));
   const profile = profileSnap.exists() ? profileSnap.data() : null;
@@ -32,13 +23,7 @@ export async function generateMetadata({
   };
 }
 
-interface PublicProfilePageProps {
-  params: {
-    username: string;
-  };
-}
-
-export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
+export default async function Page({ params }: { params: { username: string } }) {
   const usernameSnap = await getDoc(doc(db, "usernames", params.username));
   const uid = usernameSnap.exists() ? usernameSnap.data().uid : null;
 
@@ -49,8 +34,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   const mediaSnap = await getDocs(query(collection(db, "media"), where("uid", "==", uid)));
 
   const profile = profileSnap.data();
-  const links = linksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  const media = mediaSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const links = linksSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const media = mediaSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
   return (
     <div className="min-h-screen bg-black text-white px-4 py-10">
@@ -93,9 +78,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                     className="w-full object-cover h-48 blur-sm group-hover:blur-none transition"
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white opacity-100 group-hover:bg-black/40">
-                    <p className="text-sm mb-2 px-2">
-                      {item.teaserCaption || "Unlock to view full content"}
-                    </p>
+                    <p className="text-sm mb-2 px-2">{item.teaserCaption || "Unlock to view full content"}</p>
                     <button
                       onClick={() => alert(`Unlocking... Price: $${item.unlockPrice}`)}
                       className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm font-semibold"
